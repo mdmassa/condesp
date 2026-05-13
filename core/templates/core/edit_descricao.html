@@ -1,0 +1,83 @@
+{% extends 'core/base.html' %}
+{% block title %}Editar Elemento - {{ elemento.codigo }}{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <a href="{% url 'core:dashboard' %}" class="text-decoration-none mb-3 d-inline-block">
+                    <i class="fas fa-arrow-left me-1"></i> Voltar para consulta
+                </a>
+                <h1 class="display-6 fw-bold" style="color: #26128a;">
+                    <i class="fas fa-edit me-3"></i>Editar Elemento
+                </h1>
+            </div>
+            <div class="card border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="mb-4 pb-2 border-bottom">
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <span class="badge px-3 py-2" style="background: linear-gradient(135deg, #26128a, #3d26a0); font-size: 1.1rem;">
+                                {{ elemento.codigo }}
+                            </span>
+                            <h4 class="mb-0 text-dark">{{ elemento.nome }}</h4>
+                        </div>
+                    </div>
+                    <form method="post" id="editForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="id_descricao" class="form-label fw-semibold mb-2">
+                                <i class="fas fa-align-left me-2" style="color: #19b370;"></i>
+                                Descrição Completa
+                            </label>
+                            {{ form.descricao }}
+                            {% if form.descricao.help_text %}
+                                <div class="form-text text-muted mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>{{ form.descricao.help_text }}
+                                </div>
+                            {% endif %}
+                            {% if form.descricao.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {{ form.descricao.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-3 justify-content-end pt-3 border-top">
+                            <a href="{% url 'core:dashboard' %}" class="btn btn-lg px-4" 
+                               style="background-color: #f8f9fa; color: #6c757d; border-radius: 12px;">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-lg px-4" 
+                                    style="background: linear-gradient(135deg, #19b370, #148f58); color: white; border-radius: 12px;">
+                                <i class="fas fa-save me-2"></i>Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #id_descricao {
+        width: 100%;
+        min-height: 250px;
+        padding: 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-family: 'Inter', monospace;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        transition: all 0.3s ease;
+    }
+    
+    #id_descricao:focus {
+        border-color: #19b370;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(25,179,112,0.1);
+    }
+</style>
+{% endblock %}

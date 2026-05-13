@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+{% block title %}Login - Sistema de Elementos de Despesa{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-header text-white" style="background-color: #26128a">
+                <h4 class="mb-0">
+                    <i class="fas fa-sign-in-alt me-2"></i>Acesso ao Sistema
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Usuário ou senha inválidos. Tente novamente.
+                    </div>
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">
+                            <i class="fas fa-user me-1"></i>Usuário
+                        </label>
+                        <input type="text" name="username" id="id_username" class="form-control" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">
+                            <i class="fas fa-lock me-1"></i>Senha
+                        </label>
+                        <input type="password" name="password" id="id_password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn w-100 text-white" style="background-color: #26128a">
+                        <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                    </button>
+                </form>
+            </div>
+            <div class="card-footer text-muted text-center">
+                <small>Acesso restrito a usuários autorizados</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

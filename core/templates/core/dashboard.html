@@ -1,0 +1,463 @@
+{% extends 'core/base.html' %}
+{% block title %}Consultar Elementos de Despesa{% endblock %}
+
+{% block content %}
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+const isAdmin = {{ request.user.is_staff|yesno:"true,false" }};
+</script>
+
+<div class="fade-in">
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold mb-3" style="color: #26128a;">
+                Consultar Elementos de Despesa
+            </h1>
+            <p class="lead text-muted">
+                Consulte rapidamente códigos, nomes e descrições completas
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                        <div>
+                            <h5 class="mb-0 fw-semibold" style="color: #26128a;">
+                                <i class="fas fa-database me-2"></i>Base de Conhecimento
+                            </h5>
+                        </div>
+                        <div class="px-3 py-1 rounded-pill" style="background: linear-gradient(135deg, #f9f87120, #19b37020);">
+                            <i class="fas fa-chart-simple me-1" style="color: #19b370;"></i>
+                            <span class="fw-semibold" style="color: #26128a;">{{ total }} elemento{{ total|pluralize:"s" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small" style="color: #26128a;">
+                            <i class="fas fa-filter me-1"></i>Filtrar por prefixo do código
+                        </label>
+                        <div class="d-flex align-items-center gap-1 flex-wrap" id="prefixFilter">
+                            <input type="text" id="p1" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:8px;">
+                            <span class="fw-bold text-muted">.</span>
+                            <input type="text" id="p2" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:8px;">
+                            <span class="fw-bold text-muted">.</span>
+                            <input type="text" id="p3" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:8px;">
+                            <span class="fw-bold text-muted">.</span>
+                            <input type="text" id="p4" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:8px;">
+                            <span class="fw-bold text-muted">.</span>
+                            <input type="text" id="p5" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:8px;">
+                            <button id="clearPrefixBtn" class="btn btn-sm btn-light border ms-2" title="Limpar filtro de prefixo" style="border-radius:8px;">
+                                <i class="fas fa-times" style="color:#6c757d;"></i>
+                            </button>
+                        </div>
+                        <div id="prefixPreview" class="mt-1 small text-muted" style="min-height:18px;"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text border-0 bg-light" style="border-radius: 12px 0 0 12px;">
+                                <i class="fas fa-search" style="color: #19b370;"></i>
+                            </span>
+                            <input type="text" id="searchInput" class="form-control border-0 bg-light" 
+                                placeholder="Buscar por código (33903000 ou 3.3.90.30.00), nome ou descrição..."
+                                autocomplete="off"
+                                style="padding: 0.75rem 1rem;">
+                            <button id="clearBtn" class="btn btn-light border-0" type="button" 
+                                style="border-radius: 0 12px 12px 0;" title="Limpar busca">
+                                <i class="fas fa-times" style="color: #6c757d;"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 d-flex gap-2 flex-wrap align-items-center">
+                        <span class="small fw-semibold text-muted me-1"><i class="fas fa-download me-1"></i>Exportar:</span>
+                        <button class="btn btn-sm export-btn" data-fmt="xlsx" style="background:#217346;color:white;border-radius:8px;">
+                            <i class="fas fa-file-excel me-1"></i>XLSX
+                        </button>
+                        <button class="btn btn-sm export-btn" data-fmt="csv" style="background:#0d6efd;color:white;border-radius:8px;">
+                            <i class="fas fa-file-csv me-1"></i>CSV
+                        </button>
+                        <button class="btn btn-sm export-btn" data-fmt="json" style="background:#fd7e14;color:white;border-radius:8px;">
+                            <i class="fas fa-file-code me-1"></i>JSON
+                        </button>
+                        <button class="btn btn-sm export-btn" data-fmt="pdf" style="background:#dc3545;color:white;border-radius:8px;">
+                            <i class="fas fa-file-pdf me-1"></i>PDF
+                        </button>
+                    </div>
+
+                    <div id="resultsArea">
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-keyboard fa-4x" style="color: #dee2e6;"></i>
+                            </div>
+                            <h6 class="text-muted">Digite um termo para iniciar a busca</h6>
+                            <p class="text-muted small">A busca filtra por código, nome e descrição em tempo real</p>
+                        </div>
+                    </div>
+
+                    <nav aria-label="Paginação" class="mt-4">
+                        <ul class="pagination justify-content-center gap-1" id="pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="descricaoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #26128a, #3d26a0); border-radius: 20px 20px 0 0;">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-file-alt me-2"></i>Descrição Completa
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="modalDescricaoContent"></div>
+            <div class="modal-footer bg-light" style="border-radius: 0 0 20px 20px;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+let currentTerm = '';
+let searchTimeout = null;
+
+function getPrefixParts() {
+    return {
+        p1: $('#p1').val().trim(),
+        p2: $('#p2').val().trim(),
+        p3: $('#p3').val().trim(),
+        p4: $('#p4').val().trim(),
+        p5: $('#p5').val().trim(),
+    };
+}
+
+function updatePrefixPreview() {
+    const parts = getPrefixParts();
+    const filled = [parts.p1, parts.p2, parts.p3, parts.p4, parts.p5].filter(p => p !== '');
+    if (filled.length > 0) {
+        $('#prefixPreview').html(`<i class="fas fa-tag me-1"></i>Prefixo ativo: <strong style="color:#26128a;">${filled.join('.')}</strong>`);
+    } else {
+        $('#prefixPreview').text('');
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
+}
+
+function highlightText(text, term) {
+    if (!term || !text) return escapeHtml(text);
+    const escaped = escapeHtml(text);
+    const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedTerm})`, 'gi');
+    return escaped.replace(regex, '<span class="fw-bold" style="background: linear-gradient(120deg, #f9f871, #f9f87188); padding: 0 4px; border-radius: 4px;">$1</span>');
+}
+
+function renderResults(data) {
+    const resultsArea = $('#resultsArea');
+    const pagination = $('#pagination');
+
+    if (data.elementos.length === 0) {
+        resultsArea.html(`
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-search fa-3x" style="color: #dee2e6;"></i>
+                </div>
+                <h6 class="text-muted">Nenhum resultado encontrado</h6>
+                <p class="text-muted small">Tente buscar com outro termo</p>
+            </div>
+        `);
+        pagination.empty();
+        return;
+    }
+
+    let html = `<div class="mb-3 d-flex justify-content-between align-items-center">
+        <small class="text-muted">
+            <i class="fas fa-chart-line me-1" style="color: #19b370;"></i>
+            <strong>${data.total}</strong> resultado${data.total !== 1 ? 's' : ''} encontrado${data.total !== 1 ? 's' : ''}
+            ${currentTerm ? ` para "<strong class="text-dark">${escapeHtml(currentTerm)}</strong>"` : ''}
+        </small>
+    </div>`;
+
+    data.elementos.forEach(elem => {
+        const nomeHL = highlightText(elem.nome, currentTerm);
+        const codigoHL = highlightText(elem.codigo, currentTerm);
+        const descHL = elem.descricao_completa
+            ? highlightText(elem.descricao_completa.substring(0, 350), currentTerm)
+            : '<em class="text-muted">Sem descrição cadastrada</em>';
+
+        const temElementoPai = elem.elemento_pai && elem.elemento_pai.codigo !== elem.codigo;
+        const elementoPaiHTML = temElementoPai ? `
+            <div class="mb-2 pb-2 border-bottom border-dashed" style="border-bottom-style: dashed !important;">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="badge px-2 py-1" style="background: linear-gradient(135deg, #f9f871, #f9f87188); color: #26128a; font-size: 0.75rem;">
+                        ${escapeHtml(elem.elemento_pai.codigo)}
+                    </span>
+                    <span class="small fw-medium" style="color: ${elem.elemento_pai.existe_no_banco === false ? '#dc3545' : '#26128a'}">
+                        ${escapeHtml(elem.elemento_pai.nome)}
+                    </span>
+                </div>
+            </div>
+        ` : '';
+
+        html += `
+            <div class="card mb-3 border-0 shadow-sm hover-shadow transition" style="border-radius: 16px;">
+                <div class="card-body p-4">
+                    <div class="row align-items-start">
+                        <div class="col-12 col-md-8 mb-3 mb-md-0">
+                            ${elementoPaiHTML}
+                            <div class="mb-2 mt-2">
+                                <span class="badge px-3 py-2 me-2" style="background: linear-gradient(135deg, #26128a, #3d26a0); color: white; border-radius: 8px; font-size: 0.85rem;">
+                                    ${codigoHL}
+                                </span>
+                                <h5 class="d-inline-block mb-0 fw-semibold" style="color: #1a1a2e;">
+                                    ${nomeHL}
+                                </h5>
+                            </div>
+                            <div class="mt-2" style="font-size: 0.9rem; color: #6c757d; line-height: 1.5;">
+                                ${descHL}${elem.descricao_completa && elem.descricao_completa.length > 350 ? '…' : ''}
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 text-md-end">
+                            <div class="d-flex gap-2 justify-content-md-end">
+                                <button class="btn btn-sm px-3 align-items-center" onclick="showDescricao(${elem.id}, '${escapeHtml(elem.codigo)}', '${escapeHtml(elem.nome)}', \`${elem.descricao_completa.replace(/`/g,'\\`').replace(/\$/g, '\\$')}\`)"
+                                    style="background: linear-gradient(135deg, #f9f871, #f9f87188); color: #26128a; border: none; border-radius: 8px;">
+                                    <i class="fas fa-eye me-1"></i>
+                                </button>
+                                ${isAdmin ? `
+                                    <a href="/editar/${elem.id}/" class="btn btn-sm px-3 align-items-center"
+                                        style="background: linear-gradient(135deg, #19b370, #148f58); color: white; border: none; border-radius: 8px;">
+                                        <i class="fas fa-edit me-1"></i>
+                                    </a>
+                                    <form method="post" action="/deletar/${elem.id}/" style="display: inline;" 
+                                          onsubmit="return confirm('⚠️ Tem certeza que deseja excluir este elemento?\\n\\nCódigo: ${escapeHtml(elem.codigo)}\\nNome: ${escapeHtml(elem.nome)}\\n\\nEsta ação não pode ser desfeita!');"> 
+                                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                        <button type="submit" class="btn btn-sm px-3 align-items-center"
+                                                style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; border-radius: 8px;">
+                                            <i class="fas fa-trash-alt me-1"></i>
+                                        </button>
+                                    </form>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    resultsArea.html(html);
+
+    if (data.total_paginas > 1) {
+        let pages = '<ul class="pagination gap-1">';
+        
+        if (data.tem_anterior) {
+            pages += `<li class="page-item">
+                <a class="page-link" href="#" data-page="${data.pagina_atual - 1}" style="border-radius: 8px; color: #26128a;">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </a>
+            </li>`;
+        }
+        
+        for (let i = 1; i <= data.total_paginas; i++) {
+            const dist = Math.abs(i - data.pagina_atual);
+            if (dist <= 2 || i === 1 || i === data.total_paginas) {
+                if (i === data.pagina_atual) {
+                    pages += `<li class="page-item active">
+                        <span class="page-link" style="background: linear-gradient(135deg, #26128a, #3d26a0); border: none; border-radius: 8px;">${i}</span>
+                    </li>`;
+                } else {
+                    pages += `<li class="page-item">
+                        <a class="page-link" href="#" data-page="${i}" style="border-radius: 8px; color: #26128a;">${i}</a>
+                    </li>`;
+                }
+            } else if (dist === 3) {
+                pages += `<li class="page-item disabled"><span class="page-link" style="border-radius: 8px;">…</span></li>`;
+            }
+        }
+        
+        if (data.tem_proxima) {
+            pages += `<li class="page-item">
+                <a class="page-link" href="#" data-page="${data.pagina_atual + 1}" style="border-radius: 8px; color: #26128a;">
+                    Próxima <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>`;
+        }
+        
+        pages += '</ul>';
+        pagination.html(pages);
+        
+        pagination.find('.page-link[data-page]').on('click', function(e) {
+            e.preventDefault();
+            currentPage = parseInt($(this).data('page'));
+            loadResults(currentTerm, currentPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    } else {
+        pagination.empty();
+    }
+}
+
+function showDescricao(id, codigo, nome, descricao) {
+    $('#modalDescricaoContent').html(`
+        <div class="mb-3 pb-2 border-bottom">
+            <span class="badge px-3 py-2 me-2" style="background: linear-gradient(135deg, #26128a, #3d26a0); font-size: 1rem;">
+                ${escapeHtml(codigo)}
+            </span>
+            <h5 class="d-inline-block mb-0">${escapeHtml(nome)}</h5>
+        </div>
+        <div style="white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; color: #2c3e50;">
+            ${descricao ? escapeHtml(descricao) : '<em class="text-muted">Sem descrição cadastrada.</em>'}
+        </div>
+        <div class="mt-4 pt-2 text-end">
+            {% if request.user.is_authenticated %}
+            <a href="/editar/${id}/" class="btn px-4" style="background: linear-gradient(135deg, #19b370, #148f58); color: white; border-radius: 8px;">
+                <i class="fas fa-edit me-2"></i>Editar Descrição
+            </a>
+            {% endif %}
+        </div>
+    `);
+    new bootstrap.Modal(document.getElementById('descricaoModal')).show();
+}
+
+function buildParams(term, page) {
+    const parts = getPrefixParts();
+    const params = { termo: term, page: page };
+    if (parts.p1) params.p1 = parts.p1;
+    if (parts.p2) params.p2 = parts.p2;
+    if (parts.p3) params.p3 = parts.p3;
+    if (parts.p4) params.p4 = parts.p4;
+    if (parts.p5) params.p5 = parts.p5;
+    return params;
+}
+
+function loadResults(term, page) {
+    $('#loading').show();
+    $('#resultsArea').hide();
+
+    $.get('/buscar/', buildParams(term, page))
+        .done(renderResults)
+        .fail(function() {
+            $('#resultsArea').html(`
+                <div class="alert alert-danger border-0 rounded-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Erro ao buscar dados. Verifique sua conexão.
+                </div>
+            `);
+        })
+        .always(function() {
+            $('#loading').hide();
+            $('#resultsArea').show();
+        });
+}
+
+function triggerSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+        currentPage = 1;
+        const term = $('#searchInput').val().trim();
+        currentTerm = term;
+        if (term.length === 0 && !hasPrefixFilter()) {
+            $('#resultsArea').html(`
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-keyboard fa-4x" style="color: #dee2e6;"></i>
+                    </div>
+                    <h6 class="text-muted">Digite um termo para iniciar a busca</h6>
+                    <p class="text-muted small">A busca filtra por código, nome e descrição em tempo real</p>
+                </div>
+            `);
+            $('#pagination').empty();
+        } else {
+            loadResults(currentTerm, 1);
+        }
+    }, 400);
+}
+
+function hasPrefixFilter() {
+    const parts = getPrefixParts();
+    return parts.p1 || parts.p2 || parts.p3 || parts.p4 || parts.p5;
+}
+
+$(function() {
+    $('#searchInput').on('input', triggerSearch);
+
+    $('.prefix-part').on('input', function() {
+        updatePrefixPreview();
+        triggerSearch();
+    });
+
+    $('#clearBtn').on('click', function() {
+        $('#searchInput').val('').trigger('input').focus();
+    });
+
+    $('#clearPrefixBtn').on('click', function() {
+        $('.prefix-part').val('');
+        updatePrefixPreview();
+        triggerSearch();
+    });
+
+    $('#searchInput').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            clearTimeout(searchTimeout);
+            currentTerm = $(this).val().trim();
+            currentPage = 1;
+            loadResults(currentTerm, 1);
+        }
+    });
+
+    $('.export-btn').on('click', function() {
+        const fmt = $(this).data('fmt');
+        const parts = getPrefixParts();
+        const params = new URLSearchParams({ formato: fmt, termo: currentTerm });
+        if (parts.p1) params.set('p1', parts.p1);
+        if (parts.p2) params.set('p2', parts.p2);
+        if (parts.p3) params.set('p3', parts.p3);
+        if (parts.p4) params.set('p4', parts.p4);
+        if (parts.p5) params.set('p5', parts.p5);
+        window.location.href = '/exportar/?' + params.toString();
+    });
+});
+
+$('head').append(`
+    <style>
+        .hover-shadow {
+            transition: all 0.25s ease;
+        }
+        .hover-shadow:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1) !important;
+        }
+        .transition {
+            transition: all 0.25s ease;
+        }
+        .page-link {
+            transition: all 0.2s ease;
+        }
+        .page-link:hover {
+            transform: translateY(-2px);
+            background-color: #f9f871;
+            color: #26128a;
+        }
+        .prefix-part:focus {
+            border-color: #26128a !important;
+            box-shadow: 0 0 0 0.2rem rgba(38,18,138,.15) !important;
+        }
+    </style>
+`);
+</script>
+{% endblock %}
