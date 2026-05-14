@@ -5,7 +5,7 @@
 
 <script>
 const csrfToken = '{{ csrf_token }}';
-const isAdmin = {{ request.user.is_staff|yesno:"true,false" }};
+const isAdmin = '{{ request.user.is_staff|yesno:"true,false" }}';
 </script>
 
 <div class="fade-in">
@@ -58,7 +58,7 @@ const isAdmin = {{ request.user.is_staff|yesno:"true,false" }};
                     </div>
 
                     <div class="mb-4">
-                        <div class="input-group input-group-lg">
+                        <div class="input-group">
                             <span class="input-group-text border-1 bg-light" style="border-radius: 5px 0 0 5px;">
                                 <i class="fas fa-search" style="color: #26128a;"></i>
                             </span>
