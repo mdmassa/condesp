@@ -18,3 +18,22 @@ class ElementoDespesa(models.Model):
     
     def __str__(self):
         return f"{self.codigo} - {self.nome}"
+    
+
+class Document(models.Model):
+    title = models.CharField(max_length=200, verbose_name='Título')
+    author = models.CharField(max_length=100, blank=True, null=True, verbose_name='Autor')
+    description = models.TextField(blank=True, null=True, verbose_name='Descrição')
+    pdf_file = models.FileField(upload_to='documents/pdfs/', verbose_name='Arquivo PDF')
+    cover_image = models.ImageField(upload_to='documents/covers/', blank=True, null=True, verbose_name='Imagem de Capa')
+    pages = models.IntegerField(blank=True, null=True, verbose_name='Número de Páginas')
+    uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name='Data de Upload')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Data de Atualização')
+    
+    class Meta:
+        ordering = ['-uploaded_at']
+        verbose_name = 'Documento'
+        verbose_name_plural = 'Documentos'
+    
+    def __str__(self):
+        return self.title

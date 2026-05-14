@@ -283,7 +283,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'core:dashboard' %}">
+            <a class="navbar-brand mb-3 mt-3" href="{% url 'core:dashboard' %}">
                 <img src="{% static 'core/images/logo.png' %}" alt="CONDESP Logo" class="logo-img">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -292,14 +292,20 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:dashboard' %}" style="line-height: 35px;">
-                            <i class="fas fa-search me-1"></i>Consultar
+                        <a class="nav-link btn btn-outline-light px-3" href="{% url 'core:biblioteca' %}" style="line-height: 35px;">
+                            <i class="fas fa-book me-1"></i>Biblioteca de Documentos
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-light px-3" href="{% url 'core:dashboard' %}" style="line-height: 35px;">
+                            <i class="fas fa-search me-1"></i>Consultar Elementos
                         </a>
                     </li>
                     
                     {% if request.user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link btn dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <span class="user-avatar">
                                     <i class="fas fa-user fa-sm"></i>
                                 </span>
@@ -385,10 +391,8 @@
             <br>
             <img src="{% static 'core/images/brasao-prefeitura-maraba.png' %}" alt="Marabá Brasão" class="brasao-img">
             <br>
-            <br>
-            <i class="fas fa-landmark me-2"></i>
-            CONDESP — Portaria nº xxxx/xxxx - Prefeitura Municipal de Marabá
-            <br>
+            <p class="mt-2 fw-bold">Prefeitura Municipal de Marabá</p>
+            Baseado na Portaria nº 448, de 13 de setembro de 2002 <br>e no Manual de Contabilidade Aplicada ao Setor Público - MCASP (11ª edição)<br> ambos documentos da Secretaria do Tesouro Nacional - STN
             <small class="text-muted mt-2 d-block">
                 © {% now "Y" %} - Todos os direitos reservados
             </small>

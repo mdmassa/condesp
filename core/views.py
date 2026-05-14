@@ -9,10 +9,11 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Q, Value
 from django.db.models.functions import Replace
-from .models import ElementoDespesa
+from .models import ElementoDespesa, Document
 from .forms import UploadPlanilhaForm, ElementoDespesaForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.admin.views.decorators import staff_member_required
 
 def get_elemento_pai(codigo):
     if not codigo:
@@ -55,7 +56,6 @@ def get_nome_generico_pai(partes):
 def dashboard(request):
     total = ElementoDespesa.objects.count()
     return render(request, 'core/dashboard.html', {'total': total})
-
 
 def _build_queryset(termo, prefixo_partes):
     if termo:
@@ -384,3 +384,73 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('core:dashboard')
+
+def biblioteca(request):
+    documents = Document.objects.all()
+    return render(request, 'core/biblioteca.html', {'documents': documents})
+
+@staff_member_required
+def upload_document(request):
+    if request.method == 'POST':
+        try:
+            document = Document(
+                title=request.POST.get('title'),
+                author=request.POST.get('author'),
+                description=request.POST.get('description'),
+                pdf_file=request.FILES.get('pdf_file'),
+                cover_image=request.FILES.get('cover_image'),
+                pages=request.POST.get('pages') or None
+            )
+            document.save()
+            messages.success(request, 'Documento enviado com sucesso!')
+        except Exception as e:
+            messages.error(request, f'Erro ao enviar documento: {str(e)}')
+        
+        return redirect('core:biblioteca')
+    
+    return redirect('core:biblioteca')
+
+@staff_member_required
+def edit_document(request):
+    if request.method == 'POST':
+        document_id = request.POST.get('document_id')
+        document = get_object_or_404(Document, id=document_id)
+        
+        try:
+            document.title = request.POST.get('title')
+            document.author = request.POST.get('author')
+            document.description = request.POST.get('description')
+            document.pages = request.POST.get('pages') or None
+            
+            if request.FILES.get('cover_image'):
+                document.cover_image = request.FILES.get('cover_image')
+            
+            document.save()
+            messages.success(request, 'Documento atualizado com sucesso!')
+        except Exception as e:
+            messages.error(request, f'Erro ao atualizar documento: {str(e)}')
+        
+        return redirect('core:biblioteca')
+    
+    return redirect('core:biblioteca')
+
+@staff_member_required
+def delete_document(request):
+    if request.method == 'POST':
+        document_id = request.POST.get('document_id')
+        document = get_object_or_404(Document, id=document_id)
+        
+        try:
+            if document.pdf_file:
+                document.pdf_file.delete(save=False)
+            if document.cover_image:
+                document.cover_image.delete(save=False)
+            
+            document.delete()
+            messages.success(request, 'Documento excluído com sucesso!')
+        except Exception as e:
+            messages.error(request, f'Erro ao excluir documento: {str(e)}')
+        
+        return redirect('core:biblioteca')
+    
+    return redirect('core:biblioteca')

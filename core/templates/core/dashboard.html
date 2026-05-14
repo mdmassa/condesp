@@ -41,17 +41,17 @@ const isAdmin = {{ request.user.is_staff|yesno:"true,false" }};
                             <i class="fas fa-filter me-1"></i>Filtrar por prefixo do código
                         </label>
                         <div class="d-flex align-items-center gap-1 flex-wrap" id="prefixFilter">
-                            <input type="text" id="p1" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:8px;">
+                            <input type="text" id="p1" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:2px;">
                             <span class="fw-bold text-muted">.</span>
-                            <input type="text" id="p2" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:8px;">
+                            <input type="text" id="p2" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:2px;">
                             <span class="fw-bold text-muted">.</span>
-                            <input type="text" id="p3" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:8px;">
+                            <input type="text" id="p3" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:2px;">
                             <span class="fw-bold text-muted">.</span>
-                            <input type="text" id="p4" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:8px;">
+                            <input type="text" id="p4" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:2px;">
                             <span class="fw-bold text-muted">.</span>
-                            <input type="text" id="p5" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:8px;">
-                            <button id="clearPrefixBtn" class="btn btn-sm btn-light border ms-2" title="Limpar filtro de prefixo" style="border-radius:8px;">
-                                <i class="fas fa-times" style="color:#6c757d;"></i>
+                            <input type="text" id="p5" maxlength="4" class="form-control text-center prefix-part" placeholder="" style="width:60px; border-radius:2px;">
+                            <button id="clearPrefixBtn" class="btn btn-danger ms-2" title="Limpar filtro de prefixo" style="border-radius:2px;">
+                                <i class="fas fa-times"></i>
                             </button>
                         </div>
                         <div id="prefixPreview" class="mt-1 small text-muted" style="min-height:18px;"></div>
@@ -59,34 +59,36 @@ const isAdmin = {{ request.user.is_staff|yesno:"true,false" }};
 
                     <div class="mb-4">
                         <div class="input-group input-group-lg">
-                            <span class="input-group-text border-0 bg-light" style="border-radius: 12px 0 0 12px;">
-                                <i class="fas fa-search" style="color: #19b370;"></i>
+                            <span class="input-group-text border-1 bg-light" style="border-radius: 5px 0 0 5px;">
+                                <i class="fas fa-search" style="color: #26128a;"></i>
                             </span>
-                            <input type="text" id="searchInput" class="form-control border-0 bg-light" 
+                            <input type="text" id="searchInput" class="form-control border-1 bg-light prefix-part" 
                                 placeholder="Buscar por código (33903000 ou 3.3.90.30.00), nome ou descrição..."
                                 autocomplete="off"
                                 style="padding: 0.75rem 1rem;">
-                            <button id="clearBtn" class="btn btn-light border-0" type="button" 
-                                style="border-radius: 0 12px 12px 0;" title="Limpar busca">
-                                <i class="fas fa-times" style="color: #6c757d;"></i>
+                            <button id="clearBtn" class="input-group-text border-1 bg-light" type="button" 
+                                style="border-radius: 0 5px 5px 0;" title="Limpar busca">
+                                <i class="fas fa-times" style="color: #c63108;"></i>
                             </button>
                         </div>
                     </div>
 
                     <div class="mb-4 d-flex gap-2 flex-wrap align-items-center">
                         <span class="small fw-semibold text-muted me-1"><i class="fas fa-download me-1"></i>Exportar:</span>
-                        <button class="btn btn-sm export-btn" data-fmt="xlsx" style="background:#217346;color:white;border-radius:8px;">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm export-btn" data-fmt="xlsx" style="background:#217346;color:white;">
                             <i class="fas fa-file-excel me-1"></i>XLSX
-                        </button>
-                        <button class="btn btn-sm export-btn" data-fmt="csv" style="background:#0d6efd;color:white;border-radius:8px;">
-                            <i class="fas fa-file-csv me-1"></i>CSV
-                        </button>
-                        <button class="btn btn-sm export-btn" data-fmt="json" style="background:#fd7e14;color:white;border-radius:8px;">
-                            <i class="fas fa-file-code me-1"></i>JSON
-                        </button>
-                        <button class="btn btn-sm export-btn" data-fmt="pdf" style="background:#dc3545;color:white;border-radius:8px;">
-                            <i class="fas fa-file-pdf me-1"></i>PDF
-                        </button>
+                            </button>
+                            <button class="btn btn-sm export-btn" data-fmt="csv" style="background:#0d6efd;color:white;">
+                                <i class="fas fa-file-csv me-1"></i>CSV
+                            </button>
+                            <button class="btn btn-sm export-btn" data-fmt="json" style="background:#fd7e14;color:white;">
+                                <i class="fas fa-file-code me-1"></i>JSON
+                            </button>
+                            <button class="btn btn-sm export-btn" data-fmt="pdf" style="background:#dc3545;color:white;">
+                                <i class="fas fa-file-pdf me-1"></i>PDF
+                            </button>
+                        </div>
                     </div>
 
                     <div id="resultsArea">
@@ -110,15 +112,15 @@ const isAdmin = {{ request.user.is_staff|yesno:"true,false" }};
 
 <div class="modal fade" id="descricaoModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-            <div class="modal-header" style="background: linear-gradient(135deg, #26128a, #3d26a0); border-radius: 20px 20px 0 0;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 5px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #26128a, #3d26a0); border-radius: 5px 5px 0 0;">
                 <h5 class="modal-title text-white">
                     <i class="fas fa-file-alt me-2"></i>Descrição Completa
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4" id="modalDescricaoContent"></div>
-            <div class="modal-footer bg-light" style="border-radius: 0 0 20px 20px;">
+            <div class="modal-footer bg-light" style="border-radius: 0 0 5px 5px;">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>
@@ -215,13 +217,13 @@ function renderResults(data) {
         ` : '';
 
         html += `
-            <div class="card mb-3 border-0 shadow-sm hover-shadow transition" style="border-radius: 16px;">
+            <div class="card mb-3 border-1 shadow hover-shadow transition" style="border-radius: 5px;">
                 <div class="card-body p-4">
                     <div class="row align-items-start">
                         <div class="col-12 col-md-8 mb-3 mb-md-0">
                             ${elementoPaiHTML}
                             <div class="mb-2 mt-2">
-                                <span class="badge px-3 py-2 me-2" style="background: linear-gradient(135deg, #26128a, #3d26a0); color: white; border-radius: 8px; font-size: 0.85rem;">
+                                <span class="badge px-3 py-2 me-2" style="background: linear-gradient(135deg, #26128a, #3d26a0); color: white; border-radius: 5px; font-size: 0.85rem;">
                                     ${codigoHL}
                                 </span>
                                 <h5 class="d-inline-block mb-0 fw-semibold" style="color: #1a1a2e;">
@@ -235,20 +237,20 @@ function renderResults(data) {
                         <div class="col-12 col-md-4 text-md-end">
                             <div class="d-flex gap-2 justify-content-md-end">
                                 <button class="btn btn-sm px-3 align-items-center" onclick="showDescricao(${elem.id}, '${escapeHtml(elem.codigo)}', '${escapeHtml(elem.nome)}', \`${elem.descricao_completa.replace(/`/g,'\\`').replace(/\$/g, '\\$')}\`)"
-                                    style="background: linear-gradient(135deg, #f9f871, #f9f87188); color: #26128a; border: none; border-radius: 8px;">
-                                    <i class="fas fa-eye me-1"></i>
+                                    style="background: linear-gradient(135deg, #f9f871, #f9f87188); color: #26128a; border: none; border-radius: 5px;">
+                                    <i class="fas fa-eye"></i>
                                 </button>
                                 ${isAdmin ? `
                                     <a href="/editar/${elem.id}/" class="btn btn-sm px-3 align-items-center"
-                                        style="background: linear-gradient(135deg, #19b370, #148f58); color: white; border: none; border-radius: 8px;">
-                                        <i class="fas fa-edit me-1"></i>
+                                        style="background: linear-gradient(135deg, #19b370, #148f58); color: white; border: none; border-radius: 5px;">
+                                        <i class="fas fa-edit"></i>
                                     </a>
                                     <form method="post" action="/deletar/${elem.id}/" style="display: inline;" 
                                           onsubmit="return confirm('⚠️ Tem certeza que deseja excluir este elemento?\\n\\nCódigo: ${escapeHtml(elem.codigo)}\\nNome: ${escapeHtml(elem.nome)}\\n\\nEsta ação não pode ser desfeita!');"> 
                                         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                                         <button type="submit" class="btn btn-sm px-3 align-items-center"
-                                                style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; border-radius: 8px;">
-                                            <i class="fas fa-trash-alt me-1"></i>
+                                                style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; border-radius: 5px;">
+                                            <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
                                 ` : ''}
@@ -267,7 +269,7 @@ function renderResults(data) {
         
         if (data.tem_anterior) {
             pages += `<li class="page-item">
-                <a class="page-link" href="#" data-page="${data.pagina_atual - 1}" style="border-radius: 8px; color: #26128a;">
+                <a class="page-link" href="#" data-page="${data.pagina_atual - 1}" style="border-radius: 5px; color: #26128a;">
                     <i class="fas fa-chevron-left"></i> Anterior
                 </a>
             </li>`;
@@ -278,21 +280,21 @@ function renderResults(data) {
             if (dist <= 2 || i === 1 || i === data.total_paginas) {
                 if (i === data.pagina_atual) {
                     pages += `<li class="page-item active">
-                        <span class="page-link" style="background: linear-gradient(135deg, #26128a, #3d26a0); border: none; border-radius: 8px;">${i}</span>
+                        <span class="page-link" style="background: linear-gradient(135deg, #26128a, #3d26a0); border: none; border-radius: 5px;">${i}</span>
                     </li>`;
                 } else {
                     pages += `<li class="page-item">
-                        <a class="page-link" href="#" data-page="${i}" style="border-radius: 8px; color: #26128a;">${i}</a>
+                        <a class="page-link" href="#" data-page="${i}" style="border-radius: 5px; color: #26128a;">${i}</a>
                     </li>`;
                 }
             } else if (dist === 3) {
-                pages += `<li class="page-item disabled"><span class="page-link" style="border-radius: 8px;">…</span></li>`;
+                pages += `<li class="page-item disabled"><span class="page-link" style="border-radius: 5px;">…</span></li>`;
             }
         }
         
         if (data.tem_proxima) {
             pages += `<li class="page-item">
-                <a class="page-link" href="#" data-page="${data.pagina_atual + 1}" style="border-radius: 8px; color: #26128a;">
+                <a class="page-link" href="#" data-page="${data.pagina_atual + 1}" style="border-radius: 5px; color: #26128a;">
                     Próxima <i class="fas fa-chevron-right"></i>
                 </a>
             </li>`;
@@ -325,7 +327,7 @@ function showDescricao(id, codigo, nome, descricao) {
         </div>
         <div class="mt-4 pt-2 text-end">
             {% if request.user.is_authenticated %}
-            <a href="/editar/${id}/" class="btn px-4" style="background: linear-gradient(135deg, #19b370, #148f58); color: white; border-radius: 8px;">
+            <a href="/editar/${id}/" class="btn px-4" style="background: linear-gradient(135deg, #19b370, #148f58); color: white; border-radius: 3px;">
                 <i class="fas fa-edit me-2"></i>Editar Descrição
             </a>
             {% endif %}
@@ -353,7 +355,7 @@ function loadResults(term, page) {
         .done(renderResults)
         .fail(function() {
             $('#resultsArea').html(`
-                <div class="alert alert-danger border-0 rounded-3">
+                <div class="alert alert-danger border-0 rounded-1">
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     Erro ao buscar dados. Verifique sua conexão.
                 </div>
