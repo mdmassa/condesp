@@ -173,73 +173,183 @@ def exportar_elementos(request):
         )
         response['Content-Disposition'] = 'attachment; filename="elementos_despesa.json"'
         return response
-
+    
     elif formato == 'pdf':
-        try:
-            from reportlab.lib.pagesizes import A4
-            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-            from reportlab.lib.units import cm
-            from reportlab.lib import colors
+            try:
+                from reportlab.lib.pagesizes import A4
+                from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+                from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+                from reportlab.lib.units import cm, mm
+                from reportlab.lib import colors
+                from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+                from datetime import datetime
+                from django.conf import settings
+                import os
 
-            buffer = io.BytesIO()
-            doc = SimpleDocTemplate(
-                buffer,
-                pagesize=A4,
-                rightMargin=2*cm,
-                leftMargin=2*cm,
-                topMargin=2*cm,
-                bottomMargin=2*cm,
-            )
-            styles = getSampleStyleSheet()
-            style_title = ParagraphStyle(
-                'CustomTitle',
-                parent=styles['Heading1'],
-                fontSize=16,
-                textColor=colors.HexColor('#26128a'),
-                spaceAfter=20,
-            )
-            style_codigo = ParagraphStyle(
-                'Codigo',
-                parent=styles['Normal'],
-                fontSize=11,
-                textColor=colors.HexColor('#26128a'),
-                fontName='Helvetica-Bold',
-                spaceBefore=12,
-            )
-            style_nome = ParagraphStyle(
-                'Nome',
-                parent=styles['Normal'],
-                fontSize=10,
-                fontName='Helvetica-Bold',
-                spaceAfter=4,
-            )
-            style_desc = ParagraphStyle(
-                'Desc',
-                parent=styles['Normal'],
-                fontSize=9,
-                textColor=colors.HexColor('#444444'),
-                spaceAfter=8,
-            )
+                buffer = io.BytesIO()
+                
+                doc = SimpleDocTemplate(
+                    buffer,
+                    pagesize=A4,
+                    rightMargin=1.5*cm,
+                    leftMargin=1.5*cm,
+                    topMargin=2*cm,
+                    bottomMargin=2*cm,
+                )
+                
+                styles = getSampleStyleSheet()
+                
+                style_sistema = ParagraphStyle(
+                    'SistemaStyle',
+                    parent=styles['Normal'],
+                    fontSize=11,
+                    textColor=colors.HexColor('#333333'),
+                    alignment=TA_CENTER,
+                    spaceAfter=5,
+                )
+                
+                style_prefeitura = ParagraphStyle(
+                    'PrefeituraStyle',
+                    parent=styles['Normal'],
+                    fontSize=11,
+                    textColor=colors.HexColor('#333333'),
+                    alignment=TA_CENTER,
+                    spaceAfter=3,
+                )
+                
+                style_local = ParagraphStyle(
+                    'LocalStyle',
+                    parent=styles['Normal'],
+                    fontSize=9,
+                    textColor=colors.HexColor('#666666'),
+                    alignment=TA_CENTER,
+                    spaceAfter=3,
+                )
+                
+                style_datetime = ParagraphStyle(
+                    'DateTimeStyle',
+                    parent=styles['Normal'],
+                    fontSize=8,
+                    textColor=colors.HexColor('#666666'),
+                    alignment=TA_CENTER,
+                    spaceAfter=10,
+                )
+                
+                style_lista_title = ParagraphStyle(
+                    'ListaTitle',
+                    parent=styles['Heading2'],
+                    fontSize=14,
+                    textColor=colors.HexColor('#26128a'),
+                    fontName='Helvetica-Bold',
+                    alignment=TA_CENTER,
+                    spaceAfter=15,
+                    spaceBefore=10,
+                )
+                
+                style_codigo = ParagraphStyle(
+                    'Codigo',
+                    parent=styles['Normal'],
+                    fontSize=11,
+                    textColor=colors.HexColor('#26128a'),
+                    fontName='Helvetica-Bold',
+                    spaceBefore=12,
+                )
+                
+                style_nome = ParagraphStyle(
+                    'Nome',
+                    parent=styles['Normal'],
+                    fontSize=10,
+                    fontName='Helvetica-Bold',
+                    spaceAfter=4,
+                )
+                
+                style_desc = ParagraphStyle(
+                    'Desc',
+                    parent=styles['Normal'],
+                    fontSize=9,
+                    textColor=colors.HexColor('#444444'),
+                    spaceAfter=8,
+                )
+                
+                def find_image(image_name):
+                    possible_paths = [
+                        os.path.join(settings.BASE_DIR, 'core', 'static', 'core', 'images', image_name),
+                        os.path.join(settings.BASE_DIR, 'static', 'core', 'images', image_name),
+                        os.path.join(settings.BASE_DIR, 'static', 'images', image_name),
+                        os.path.join(settings.BASE_DIR, 'static', image_name),
+                        f'core/static/core/images/{image_name}',
+                        f'static/core/images/{image_name}',
+                    ]
+                    
+                    for path in possible_paths:
+                        if os.path.exists(path):
+                            return path
+                    return None
+                
+                def load_image(image_name, width=35*mm, height=35*mm):
+                    image_path = find_image(image_name)
+                    if image_path:
+                        try:
+                            img = Image(image_path, width=width, height=height)
+                            img.hAlign = 'CENTER'
+                            return img
+                        except Exception:
+                            return None
+                    return None
+                
+                story = []
+                
+                logo = load_image('logo-alt.png', width=70*mm, height=15*mm)
+                brasao = load_image('brasao-prefeitura-maraba.png', width=35*mm, height=35*mm)
+                
+                if logo:
+                    story.append(logo)
+                    story.append(Spacer(1, 5))
+                
+                if brasao:
+                    story.append(brasao)
+                    story.append(Spacer(1, 5))
+                
+                story.append(Paragraph("Sistema de Conhecimento de Despesa", style_sistema))
+                story.append(Paragraph("Prefeitura Municipal de Marabá", style_prefeitura))
+                story.append(Paragraph("Marabá, Pará, Brasil", style_local))
+                story.append(Spacer(1, 5))
+                
+                story.append(Paragraph("Lista de Elementos de Despesa", style_lista_title))
+                story.append(Spacer(1, 5))
+                now = datetime.now()
+                data_hora_str = now.strftime("%d/%m/%Y às %H:%M:%S")
+                story.append(Paragraph(f"Data de emissão: {data_hora_str}", style_datetime))
+                story.append(Spacer(1, 10))
+                
+                for item in dados:
+                    story.append(Paragraph(item['codigo'], style_codigo))
+                    story.append(Paragraph(item['nome'], style_nome))
+                    if item['descricao']:
+                        story.append(Paragraph(item['descricao'], style_desc))
+                    story.append(Spacer(1, 4))
+                
+                def add_page_number(canvas, doc):
+                    canvas.saveState()
+                    page_num = canvas.getPageNumber()
+                    text = f"Página {page_num}"
+                    canvas.setFont('Helvetica', 8)
+                    canvas.drawCentredString(doc.width/2 + doc.leftMargin, 
+                                            doc.bottomMargin - 0.5*cm, 
+                                            text)
+                    canvas.restoreState()
+                
+                doc.build(story, onFirstPage=add_page_number, onLaterPages=add_page_number)
+                
+                buffer.seek(0)
+                response = HttpResponse(buffer.read(), content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="elementos_despesa.pdf"'
+                return response
 
-            story = [Paragraph('Elementos de Despesa', style_title)]
-            for item in dados:
-                story.append(Paragraph(item['codigo'], style_codigo))
-                story.append(Paragraph(item['nome'], style_nome))
-                if item['descricao']:
-                    story.append(Paragraph(item['descricao'], style_desc))
-                story.append(Spacer(1, 4))
-
-            doc.build(story)
-            buffer.seek(0)
-            response = HttpResponse(buffer.read(), content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="elementos_despesa.pdf"'
-            return response
-
-        except ImportError:
-            return HttpResponse('ReportLab não instalado. Instale com: pip install reportlab', status=500)
-
-    return HttpResponse('Formato inválido', status=400)
+            except ImportError as e:
+                return HttpResponse(f'Erro: {str(e)}. Instale com: pip install reportlab pillow', status=500)
+            except Exception as e:
+                return HttpResponse(f'Erro ao gerar PDF: {str(e)}', status=500)
 
 
 @login_required
